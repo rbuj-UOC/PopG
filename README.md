@@ -20,6 +20,12 @@ To start a new run immediately at startup (without opening the New Run settings 
 ./run.sh -n
 ```
 
+To auto-save a plot screenshot after a run finishes and then exit the app, use:
+
+```bash
+./run.sh -n -p=out/plot.png
+```
+
 The script will:
 
 1. Compile `src/PopGUserInterface.java` into the `out/` directory.
@@ -37,6 +43,12 @@ You can combine it with `-n` to load defaults and immediately execute the New Ru
 
 ```bash
 ./run.sh path/to/defaults.json -n
+```
+
+You can also combine defaults, auto-run, and screenshot capture:
+
+```bash
+./run.sh path/to/defaults.json -n -p=out/plot.png
 ```
 
 If the file can be read, any recognized fields in the JSON will override the built-in defaults from `initInputVals()`.
@@ -63,7 +75,13 @@ You can pass the same optional arguments as `run.sh`:
 java -jar PopG.jar -n
 java -jar PopG.jar path/to/defaults.json
 java -jar PopG.jar path/to/defaults.json -n
+java -jar PopG.jar path/to/defaults.json -n -p=out/plot.png
 ```
+
+CLI options:
+
+- `-n`: start a New Run immediately at startup.
+- `-p=path/to/file.png`: after a run finishes, save a plot screenshot to the given path and close the application. Requires `-n`.
 
 Supported JSON keys (all optional):
 

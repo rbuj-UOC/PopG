@@ -16,6 +16,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
@@ -122,6 +123,8 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		+ "  \"randSeed\": 0\n"
 		+ "}";
 	private String filedir;
+	private String pendingScreenshotPath;
+	private boolean screenshotCaptured;
 	
 	public class PopGData {
 		Integer popSize;
@@ -141,6 +144,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	private static class CliOptions {
 		String defaultsJsonPath;
 		boolean autoStartNewRun;
+		String screenshotPath;
 	}
 
 	private static CliOptions parseCliOptions(String[] args) {
@@ -152,11 +156,23 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		for (String arg : args) {
 			if ("-n".equals(arg)) {
 				options.autoStartNewRun = true;
+			} else if (arg.startsWith("-p=")) {
+				String screenshotPathArg = arg.substring(3).trim();
+				if (screenshotPathArg.isEmpty()) {
+					System.err.println("Warning: -p requires a non-empty path, example: -p=plot.png");
+				} else {
+					options.screenshotPath = screenshotPathArg;
+				}
 			} else if (!arg.startsWith("-") && options.defaultsJsonPath == null) {
 				options.defaultsJsonPath = arg;
 			} else {
 				System.err.println("Warning: unrecognized argument '" + arg + "'");
 			}
+		}
+
+		if (options.screenshotPath != null && !options.autoStartNewRun) {
+			System.err.println("Warning: -p requires -n; screenshot option will be ignored.");
+			options.screenshotPath = null;
 		}
 
 		return options;
@@ -593,6 +609,11 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         mnFile.add(mntmQuit);
 		frmPopG.setVisible(true);
 
+		if (options != null && options.screenshotPath != null) {
+			pendingScreenshotPath = options.screenshotPath;
+			screenshotCaptured = false;
+		}
+
 		if (options != null && options.autoStartNewRun) {
 			runNewRunDirectly();
 		}
@@ -971,7 +992,27 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		timer.stop();
 		//frmPopG.repaint();
 		displayPanel.repaint();
+		captureAndExitIfRequested();
 
+	}
+
+	private void captureAndExitIfRequested() {
+		if (pendingScreenshotPath == null || pendingScreenshotPath.isEmpty() || screenshotCaptured) {
+			return;
+		}
+
+		screenshotCaptured = true;
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					savePlotImageToPath(pendingScreenshotPath);
+				} catch (IOException ioe) {
+					System.err.println("Warning: could not save screenshot to '" + pendingScreenshotPath + "': " + ioe.getMessage());
+				} finally {
+					System.exit(0);
+				}
+			}
+		});
 	}
 
 	long binomial(long n, double pp) {
@@ -1205,6 +1246,52 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		   }
 		   */
 		}
+	}
+
+	private void savePlotImageToPath(String outputPath) throws IOException {
+		BufferedImage bi = new BufferedImage(frmPopG.getWidth(), frmPopG.getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2d = bi.createGraphics();
+		g2d.setColor(Color.WHITE);
+		g2d.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+		g2d.setColor(Color.BLACK);
+		xOffset = 100;
+		yOffset = 40;
+		xLen = frmPopG.getWidth() - 200;
+		yLen = frmPopG.getHeight() - 130;
+		Font titleFont = new Font("helvetica", Font.BOLD, 18);
+		g2d.setFont(titleFont);
+		g2d.drawString("PopG plot", xOffset + 150, yOffset - 20);
+		plotPopG(g2d);
+		g2d.dispose();
+
+		File saveFile = new File(outputPath);
+		File parentDir = saveFile.getAbsoluteFile().getParentFile();
+		if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
+			throw new IOException("cannot create directories for output path");
+		}
+
+		String ext = getImageExtension(saveFile.getName());
+		if (ext == null) {
+			ext = "png";
+			saveFile = new File(outputPath + ".png");
+		}
+
+		if (!ImageIO.write(bi, ext, saveFile)) {
+			throw new IOException("unsupported image format: " + ext);
+		}
+	}
+
+	private String getImageExtension(String fileName) {
+		int idx = fileName.lastIndexOf('.');
+		if (idx < 0 || idx == fileName.length() - 1) {
+			return null;
+		}
+
+		String ext = fileName.substring(idx + 1).toLowerCase();
+		if ("png".equals(ext) || "jpg".equals(ext) || "jpeg".equals(ext)) {
+			return ext;
+		}
+		return null;
 	}
 
 	void draw(Graphics g) {
