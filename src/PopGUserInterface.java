@@ -54,6 +54,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	private JMenuItem mntmContinuew;
 	private JMenuItem mntmContinue;
 	private JMenuItem mntmNewRun;
+	private JMenuItem mntmLoadRun;
 	private JMenuItem mntmRestart;
 	private JMenuItem mntmWholePlot;
 	public int numberOfGen;
@@ -229,6 +230,14 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         
         mnRun = new JMenu("Run");
         menuFile.add(mnRun);
+		mntmLoadRun = new JMenuItem("Load Run");
+		mntmLoadRun.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				loadRunFromJsonChooser();
+			}
+		});
+		mnRun.add(mntmLoadRun);
+
         mntmContinuew = new JMenuItem("Continue w/ 100");
         mntmContinuew.setEnabled(false);
         mntmContinuew.addActionListener(new ActionListener() {
@@ -427,25 +436,8 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         		btnDefaults.setBounds(180, 285, 84, 25);
         		btnDefaults.addActionListener(new ActionListener() {
                 	public void actionPerformed(ActionEvent e) {
-                		initInputVals();                		
-                		txtPopSize.setText(inputvals.popSize.toString());
-                		txtFitGenAA.setText(inputvals.fitGenAA.toString());
-                		txtFitGenAa.setText(inputvals.fitGenAa.toString());
-                		txtFitGenaa.setText(inputvals.fitGenaa.toString());
-                		txtMutAa.setText(inputvals.mutAa.toString());
-                		txtMutaA.setText(inputvals.mutaA.toString());
-                		txtMigRate.setText(inputvals.migRate.toString());
-                		txtInitFreq.setText(inputvals.initFreq.toString());
-                		txtGenRun.setText(inputvals.genRun.toString());
-                   		txtNumPop.setText(inputvals.numPop.toString());
-                   		if (inputvals.genSeed)
-                		{
-                			txtRandSeed.setText("(Autogenerate)");
-                		}
-                		else
-                		{
-                			txtRandSeed.setText(inputvals.randSeed.toString());
-                		}
+			                	initInputVals();
+			                	refreshSettingsFieldsFromInputVals();
                  	}
                 });
          		frmPopGSettingsMenu.add(btnDefaults);
@@ -1004,6 +996,69 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	void initInputVals(){
 		applyInputValsFromJsonText(DEFAULTS_JSON_TEXT);
 	}	 
+
+	private void refreshSettingsFieldsFromInputVals() {
+		if (txtPopSize != null) {
+			txtPopSize.setText(inputvals.popSize.toString());
+		}
+		if (txtFitGenAA != null) {
+			txtFitGenAA.setText(inputvals.fitGenAA.toString());
+		}
+		if (txtFitGenAa != null) {
+			txtFitGenAa.setText(inputvals.fitGenAa.toString());
+		}
+		if (txtFitGenaa != null) {
+			txtFitGenaa.setText(inputvals.fitGenaa.toString());
+		}
+		if (txtMutAa != null) {
+			txtMutAa.setText(inputvals.mutAa.toString());
+		}
+		if (txtMutaA != null) {
+			txtMutaA.setText(inputvals.mutaA.toString());
+		}
+		if (txtMigRate != null) {
+			txtMigRate.setText(inputvals.migRate.toString());
+		}
+		if (txtInitFreq != null) {
+			txtInitFreq.setText(inputvals.initFreq.toString());
+		}
+		if (txtGenRun != null) {
+			txtGenRun.setText(inputvals.genRun.toString());
+		}
+		if (txtNumPop != null) {
+			txtNumPop.setText(inputvals.numPop.toString());
+		}
+		if (txtRandSeed != null) {
+			if (inputvals.genSeed) {
+				txtRandSeed.setText("(Autogenerate)");
+			} else {
+				txtRandSeed.setText(inputvals.randSeed.toString());
+			}
+		}
+	}
+
+	private void loadRunFromJsonChooser() {
+		JFileChooser filechooser = new JFileChooser(filedir);
+		filechooser.setAcceptAllFileFilterUsed(false);
+		FileNameExtensionFilter jsonFilter = new FileNameExtensionFilter("JSON File", "json");
+		filechooser.addChoosableFileFilter(jsonFilter);
+		filechooser.setFileFilter(jsonFilter);
+
+		int result = filechooser.showOpenDialog(this);
+		if (result != JFileChooser.APPROVE_OPTION) {
+			return;
+		}
+
+		File selectedFile = filechooser.getSelectedFile();
+		filedir = filechooser.getCurrentDirectory().getAbsolutePath();
+
+		try {
+			loadInputValsFromJson(selectedFile.getAbsolutePath());
+			runNewRunDirectly();
+		} catch (IOException ioe) {
+			JOptionPane.showMessageDialog(null, "Could not load JSON file: " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
 
 	private void loadInputValsFromJson(String jsonFilePath) throws IOException {
 		String jsonText = Files.readString(Path.of(jsonFilePath), StandardCharsets.UTF_8);
