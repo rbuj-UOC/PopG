@@ -67,18 +67,18 @@ java -jar PopG.jar path/to/defaults.json -n
 
 Supported JSON keys (all optional):
 
-- `popSize`
-- `fitGenAA`
-- `fitGenAa`
-- `fitGenaa`
-- `mutAa`
-- `mutaA`
-- `migRate`
-- `initFreq`
-- `genRun`
-- `numPop`
-- `genSeed`
-- `randSeed`
+- `popSize`: initial population size.
+- `fitGenAA`: fitness value for genotype `AA`.
+- `fitGenAa`: fitness value for genotype `Aa`.
+- `fitGenaa`: fitness value for genotype `aa`.
+- `mutAa`: mutation rate from allele `A` to `a`.
+- `mutaA`: mutation rate from allele `a` to `A`.
+- `migRate`: migration rate between populations.
+- `initFreq`: initial frequency of allele `A`.
+- `genRun`: number of generations to simulate.
+- `numPop`: number of populations in the simulation.
+- `genSeed`: whether to generate a random seed automatically.
+- `randSeed`: explicit random seed value (used when `genSeed` is `false`).
 
 ## Example JSON
 
