@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -104,6 +106,20 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	private int endGen;
 	private Timer timer;
 	private static final int TIMELEN = 1;
+	private static final String DEFAULTS_JSON_TEXT = "{\n"
+		+ "  \"popSize\": 100,\n"
+		+ "  \"fitGenAA\": 1.0,\n"
+		+ "  \"fitGenAa\": 1.0,\n"
+		+ "  \"fitGenaa\": 1.0,\n"
+		+ "  \"mutAa\": 0.0,\n"
+		+ "  \"mutaA\": 0.0,\n"
+		+ "  \"migRate\": 0.0,\n"
+		+ "  \"initFreq\": 0.5,\n"
+		+ "  \"genRun\": 100,\n"
+		+ "  \"numPop\": 10,\n"
+		+ "  \"genSeed\": true,\n"
+		+ "  \"randSeed\": 0\n"
+		+ "}";
 	private String filedir;
 	
 	public class PopGData {
@@ -986,114 +1002,34 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	}
 	 
 	void initInputVals(){
-		inputvals.popSize = 100;
-		inputvals.fitGenAA = 1.0;
-		inputvals.fitGenAa = 1.0;
-		inputvals.fitGenaa = 1.0;
-		inputvals.mutAa = 0.0;
-		inputvals.mutaA = 0.0;
-		inputvals.migRate = 0.0;
-		inputvals.initFreq = 0.5;
-		inputvals.genRun = 100;
-		inputvals.numPop = 10;
-		inputvals.genSeed = true;
-		inputvals.randSeed = (long) 0;
+		applyInputValsFromJsonText(DEFAULTS_JSON_TEXT);
 	}	 
 
 	private void loadInputValsFromJson(String jsonFilePath) throws IOException {
 		String jsonText = Files.readString(Path.of(jsonFilePath), StandardCharsets.UTF_8);
-
-		Integer popSizeVal = parseIntegerField(jsonText, "popSize");
-		if (popSizeVal != null) {
-			inputvals.popSize = popSizeVal;
-		}
-
-		Double fitGenAAVal = parseDoubleField(jsonText, "fitGenAA");
-		if (fitGenAAVal != null) {
-			inputvals.fitGenAA = fitGenAAVal;
-		}
-
-		Double fitGenAaVal = parseDoubleField(jsonText, "fitGenAa");
-		if (fitGenAaVal != null) {
-			inputvals.fitGenAa = fitGenAaVal;
-		}
-
-		Double fitGenaaVal = parseDoubleField(jsonText, "fitGenaa");
-		if (fitGenaaVal != null) {
-			inputvals.fitGenaa = fitGenaaVal;
-		}
-
-		Double mutAaVal = parseDoubleField(jsonText, "mutAa");
-		if (mutAaVal != null) {
-			inputvals.mutAa = mutAaVal;
-		}
-
-		Double mutaAVal = parseDoubleField(jsonText, "mutaA");
-		if (mutaAVal != null) {
-			inputvals.mutaA = mutaAVal;
-		}
-
-		Double migRateVal = parseDoubleField(jsonText, "migRate");
-		if (migRateVal != null) {
-			inputvals.migRate = migRateVal;
-		}
-
-		Double initFreqVal = parseDoubleField(jsonText, "initFreq");
-		if (initFreqVal != null) {
-			inputvals.initFreq = initFreqVal;
-		}
-
-		Integer genRunVal = parseIntegerField(jsonText, "genRun");
-		if (genRunVal != null) {
-			inputvals.genRun = genRunVal;
-		}
-
-		Integer numPopVal = parseIntegerField(jsonText, "numPop");
-		if (numPopVal != null) {
-			inputvals.numPop = numPopVal;
-		}
-
-		Boolean genSeedVal = parseBooleanField(jsonText, "genSeed");
-		if (genSeedVal != null) {
-			inputvals.genSeed = genSeedVal;
-		}
-
-		Long randSeedVal = parseLongField(jsonText, "randSeed");
-		if (randSeedVal != null) {
-			inputvals.randSeed = randSeedVal;
-		}
+		applyInputValsFromJsonText(jsonText);
 	}
 
-	private Integer parseIntegerField(String jsonText, String fieldName) {
-		String rawValue = extractJsonFieldValue(jsonText, fieldName, "-?\\d+");
-		if (rawValue == null) {
-			return null;
-		}
-		return Integer.valueOf(rawValue);
+	private void applyInputValsFromJsonText(String jsonText) {
+		setFieldFromJson(jsonText, "popSize", "-?\\d+", Integer::valueOf, value -> inputvals.popSize = value);
+		setFieldFromJson(jsonText, "fitGenAA", "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?", Double::valueOf, value -> inputvals.fitGenAA = value);
+		setFieldFromJson(jsonText, "fitGenAa", "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?", Double::valueOf, value -> inputvals.fitGenAa = value);
+		setFieldFromJson(jsonText, "fitGenaa", "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?", Double::valueOf, value -> inputvals.fitGenaa = value);
+		setFieldFromJson(jsonText, "mutAa", "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?", Double::valueOf, value -> inputvals.mutAa = value);
+		setFieldFromJson(jsonText, "mutaA", "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?", Double::valueOf, value -> inputvals.mutaA = value);
+		setFieldFromJson(jsonText, "migRate", "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?", Double::valueOf, value -> inputvals.migRate = value);
+		setFieldFromJson(jsonText, "initFreq", "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?", Double::valueOf, value -> inputvals.initFreq = value);
+		setFieldFromJson(jsonText, "genRun", "-?\\d+", Integer::valueOf, value -> inputvals.genRun = value);
+		setFieldFromJson(jsonText, "numPop", "-?\\d+", Integer::valueOf, value -> inputvals.numPop = value);
+		setFieldFromJson(jsonText, "genSeed", "true|false", value -> Boolean.valueOf(value.toLowerCase()), value -> inputvals.genSeed = value);
+		setFieldFromJson(jsonText, "randSeed", "-?\\d+", Long::valueOf, value -> inputvals.randSeed = value);
 	}
 
-	private Long parseLongField(String jsonText, String fieldName) {
-		String rawValue = extractJsonFieldValue(jsonText, fieldName, "-?\\d+");
-		if (rawValue == null) {
-			return null;
+	private <T> void setFieldFromJson(String jsonText, String fieldName, String valuePattern, Function<String, T> parser, Consumer<T> setter) {
+		String rawValue = extractJsonFieldValue(jsonText, fieldName, valuePattern);
+		if (rawValue != null) {
+			setter.accept(parser.apply(rawValue));
 		}
-		return Long.valueOf(rawValue);
-	}
-
-	private Double parseDoubleField(String jsonText, String fieldName) {
-		String rawValue = extractJsonFieldValue(jsonText, fieldName, "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
-		if (rawValue == null) {
-			return null;
-		}
-		return Double.valueOf(rawValue);
-	}
-
-	private Boolean parseBooleanField(String jsonText, String fieldName) {
-		String rawValue = extractJsonFieldValue(jsonText, fieldName, "true|false");
-		if (rawValue == null) {
-			return null;
-		}
-		return Boolean.valueOf(rawValue.toLowerCase());
 	}
 
 	private String extractJsonFieldValue(String jsonText, String fieldName, String valuePattern) {

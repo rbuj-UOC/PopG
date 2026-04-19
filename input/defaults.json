@@ -1,14 +1,14 @@
 {
-  "popSize": 250,
-  "fitGenAA": 0.95,
+  "popSize": 100,
+  "fitGenAA": 1.0,
   "fitGenAa": 1.0,
-  "fitGenaa": 1.05,
-  "mutAa": 0.001,
-  "mutaA": 0.002,
-  "migRate": 0.01,
-  "initFreq": 0.4,
-  "genRun": 200,
-  "numPop": 15,
-  "genSeed": false,
-  "randSeed": 42
+  "fitGenaa": 1.0,
+  "mutAa": 0.0,
+  "mutaA": 0.0,
+  "migRate": 0.0,
+  "initFreq": 0.5,
+  "genRun": 100,
+  "numPop": 10,
+  "genSeed": true,
+  "randSeed": 0
 }
