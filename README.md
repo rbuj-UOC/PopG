@@ -14,6 +14,12 @@ From the project root:
 ./run.sh
 ```
 
+To start a new run immediately at startup (without opening the New Run settings form), use:
+
+```bash
+./run.sh -n
+```
+
 The script will:
 
 1. Compile `src/PopGUserInterface.java` into the `out/` directory.
@@ -21,10 +27,16 @@ The script will:
 
 ## Run with a JSON defaults file
 
-You can pass a JSON file as the first argument to preload default input values.
+You can pass a JSON file path to preload default input values.
 
 ```bash
 ./run.sh path/to/defaults.json
+```
+
+You can combine it with `-n` to load defaults and immediately execute the New Run flow:
+
+```bash
+./run.sh path/to/defaults.json -n
 ```
 
 If the file can be read, any recognized fields in the JSON will override the built-in defaults from `initInputVals()`.

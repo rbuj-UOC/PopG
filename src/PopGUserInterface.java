@@ -120,6 +120,30 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		Boolean genSeed;
 		Long randSeed;
 	}
+
+	private static class CliOptions {
+		String defaultsJsonPath;
+		boolean autoStartNewRun;
+	}
+
+	private static CliOptions parseCliOptions(String[] args) {
+		CliOptions options = new CliOptions();
+		if (args == null) {
+			return options;
+		}
+
+		for (String arg : args) {
+			if ("-n".equals(arg)) {
+				options.autoStartNewRun = true;
+			} else if (!arg.startsWith("-") && options.defaultsJsonPath == null) {
+				options.defaultsJsonPath = arg;
+			} else {
+				System.err.println("Warning: unrecognized argument '" + arg + "'");
+			}
+		}
+
+		return options;
+	}
 	
 	/**
 	 * Launch the application.
@@ -127,10 +151,11 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	
 
 	public static void main(String[] args) {
+		final CliOptions options = parseCliOptions(args);
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					PopGUserInterface frame = new PopGUserInterface(args);
+					PopGUserInterface frame = new PopGUserInterface(options);
 					frame.frmPopG.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -143,15 +168,15 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	 * Create the frame.
 	 */
 
-	public PopGUserInterface(String[] args) {
+	public PopGUserInterface(CliOptions options) {
 		// initialize data
 		inputvals = new PopGData();
 		initInputVals();
-		if (args != null && args.length > 0) {
+		if (options != null && options.defaultsJsonPath != null) {
 			try {
-				loadInputValsFromJson(args[0]);
+				loadInputValsFromJson(options.defaultsJsonPath);
 			} catch (IOException ioe) {
-				System.err.println("Warning: could not read defaults file '" + args[0] + "': " + ioe.getMessage());
+				System.err.println("Warning: could not read defaults file '" + options.defaultsJsonPath + "': " + ioe.getMessage());
 			}
 		}
    	 	genArray = new ArrayList<ArrayList<Double>>();
@@ -424,146 +449,11 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         		btnOK.setBounds(362, 285, 84, 25);
         		btnOK.addActionListener(new ActionListener() {
         			public void actionPerformed(ActionEvent e) {
-        	       		genArray.clear();
-        				frmPopG.repaint();
-        				String msg;
-        				boolean runtests = true;
-        				try
-        				{
-        					inputvals.popSize = Integer.parseInt(txtPopSize.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Population Size must be an integer";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-        				
-           				try
-        				{
-           					inputvals.fitGenAA = Double.parseDouble(txtFitGenAA.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Fitness of Genotype AA must be a number";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-           				try
-        				{
-           					inputvals.fitGenAa = Double.parseDouble(txtFitGenAa.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Fitness of Genotype Aa must be a number";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-           				try
-        				{
-           					inputvals.fitGenaa = Double.parseDouble(txtFitGenaa.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Fitness of Genotype aa must be a number";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-           				try
-        				{
-           					inputvals.mutAa = Double.parseDouble(txtMutAa.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Mutations from A to a must be a number";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-           				try
-        				{
-           					inputvals.mutaA = Double.parseDouble(txtMutaA.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Mutations from a to A must be a number";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-           				try
-        				{
-           					inputvals.migRate = Double.parseDouble(txtMigRate.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Migration Rate must be a number";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-           				try
-        				{
-           					inputvals.initFreq = Double.parseDouble(txtInitFreq.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Initial Frequency of A must be a number";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-           				try
-        				{
-           					inputvals.genRun = Integer.parseInt(txtGenRun.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Generations to run must be an integer";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-           				try
-        				{
-           					inputvals.numPop = Integer.parseInt(txtNumPop.getText());
-        				}
-        				catch (NumberFormatException nfe)
-        				{
-        					msg = "Populations evolving must be an integer";
-        					JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-        					runtests = false;
-        				}
-           				
-        				try {
-        					long longVal =Long.parseLong(txtRandSeed.getText());
- 	       					inputvals.genSeed = false;
-	       					inputvals.randSeed = longVal;
-	       					numberSeed = new Random(inputvals.randSeed); 
-    					}
-        				catch (NumberFormatException nfe)
-        				{
-         					inputvals.genSeed = true;
-          					numberSeed = new Random(); 
-        				}
-        				
-        				if (runtests)
-        				{
-	         				mntmContinuew.setEnabled(true);
-	        				mntmContinue.setEnabled(true);
-	        				mntmRestart.setEnabled(true);
-	        				mntmContinuew.setText("Continue w/ " + inputvals.genRun);
-	        				mntmWholePlot.setEnabled(true);
-	        		        mntmSave.setEnabled(true);
-	        		        mntmPrint.setEnabled(true);
-	        				if(checkInputVals()) {
-	        					frmPopGSettingsMenu.dispose();
-	         	       			runPopGThreads(true, inputvals.genRun);        					
-	         				}
-        				}
+	        				genArray.clear();
+						frmPopG.repaint();
+						if (updateInputValsFromSettingsFields()) {
+							startNewRunFromCurrentInputVals(true);
+						}
         			}
         		});
  
@@ -577,14 +467,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         mntmRestart.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 				frmPopG.repaint();
-				if(inputvals.genSeed)
-				{
- 					numberSeed = new Random(); 
-				}
-				else
-				{
-   					numberSeed = new Random(inputvals.randSeed); 
-				}
+				initializeRandomSeedFromInputVals();
 				runPopGThreads(true, inputvals.genRun);
             }
         });
@@ -700,7 +583,11 @@ public class PopGUserInterface extends JPanel implements ActionListener{
             }
         });
         mnFile.add(mntmQuit);
-        frmPopG.setVisible(true);        
+		frmPopG.setVisible(true);
+
+		if (options != null && options.autoStartNewRun) {
+			runNewRunDirectly();
+		}
 	}
 	
 	public boolean checkInputVals() {
@@ -797,6 +684,168 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	
 	public void actionPerformed(ActionEvent e){
 		displayPanel.repaint();
+	}
+
+	private void initializeRandomSeedFromInputVals() {
+		if (inputvals.genSeed) {
+			numberSeed = new Random();
+		} else {
+			numberSeed = new Random(inputvals.randSeed);
+		}
+	}
+
+	private void enableRunMenuItems() {
+		mntmContinuew.setEnabled(true);
+		mntmContinue.setEnabled(true);
+		mntmRestart.setEnabled(true);
+		mntmContinuew.setText("Continue w/ " + inputvals.genRun);
+		mntmWholePlot.setEnabled(true);
+		mntmSave.setEnabled(true);
+		mntmPrint.setEnabled(true);
+	}
+
+	private void startNewRunFromCurrentInputVals(boolean closeSettingsWindow) {
+		enableRunMenuItems();
+		if (checkInputVals()) {
+			if (closeSettingsWindow && frmPopGSettingsMenu != null) {
+				frmPopGSettingsMenu.dispose();
+			}
+			runPopGThreads(true, inputvals.genRun);
+		}
+	}
+
+	private boolean updateInputValsFromSettingsFields() {
+		String msg;
+		boolean runtests = true;
+		try
+		{
+			inputvals.popSize = Integer.parseInt(txtPopSize.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Population Size must be an integer";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.fitGenAA = Double.parseDouble(txtFitGenAA.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Fitness of Genotype AA must be a number";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.fitGenAa = Double.parseDouble(txtFitGenAa.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Fitness of Genotype Aa must be a number";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.fitGenaa = Double.parseDouble(txtFitGenaa.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Fitness of Genotype aa must be a number";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.mutAa = Double.parseDouble(txtMutAa.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Mutations from A to a must be a number";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.mutaA = Double.parseDouble(txtMutaA.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Mutations from a to A must be a number";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.migRate = Double.parseDouble(txtMigRate.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Migration Rate must be a number";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.initFreq = Double.parseDouble(txtInitFreq.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Initial Frequency of A must be a number";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.genRun = Integer.parseInt(txtGenRun.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Generations to run must be an integer";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try
+		{
+			inputvals.numPop = Integer.parseInt(txtNumPop.getText());
+		}
+		catch (NumberFormatException nfe)
+		{
+			msg = "Populations evolving must be an integer";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			runtests = false;
+		}
+
+		try {
+			long longVal = Long.parseLong(txtRandSeed.getText());
+			inputvals.genSeed = false;
+			inputvals.randSeed = longVal;
+		}
+		catch (NumberFormatException nfe)
+		{
+			inputvals.genSeed = true;
+		}
+
+		initializeRandomSeedFromInputVals();
+		return runtests;
+	}
+
+	private void runNewRunDirectly() {
+		genArray.clear();
+		frmPopG.repaint();
+		initializeRandomSeedFromInputVals();
+		startNewRunFromCurrentInputVals(false);
 	}
 	
 	void calcPopG(Boolean newRun, Integer genLim) {
