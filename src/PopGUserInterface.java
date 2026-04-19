@@ -31,6 +31,11 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 public class PopGUserInterface extends JPanel implements ActionListener{
@@ -125,7 +130,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					PopGUserInterface frame = new PopGUserInterface();
+					PopGUserInterface frame = new PopGUserInterface(args);
 					frame.frmPopG.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -138,10 +143,17 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	 * Create the frame.
 	 */
 
-	public PopGUserInterface() {
+	public PopGUserInterface(String[] args) {
 		// initialize data
 		inputvals = new PopGData();
 		initInputVals();
+		if (args != null && args.length > 0) {
+			try {
+				loadInputValsFromJson(args[0]);
+			} catch (IOException ioe) {
+				System.err.println("Warning: could not read defaults file '" + args[0] + "': " + ioe.getMessage());
+			}
+		}
    	 	genArray = new ArrayList<ArrayList<Double>>();
 		filedir = System.getProperty("user.dir");
 
@@ -938,6 +950,111 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		inputvals.genSeed = true;
 		inputvals.randSeed = (long) 0;
 	}	 
+
+	private void loadInputValsFromJson(String jsonFilePath) throws IOException {
+		String jsonText = Files.readString(Path.of(jsonFilePath), StandardCharsets.UTF_8);
+
+		Integer popSizeVal = parseIntegerField(jsonText, "popSize");
+		if (popSizeVal != null) {
+			inputvals.popSize = popSizeVal;
+		}
+
+		Double fitGenAAVal = parseDoubleField(jsonText, "fitGenAA");
+		if (fitGenAAVal != null) {
+			inputvals.fitGenAA = fitGenAAVal;
+		}
+
+		Double fitGenAaVal = parseDoubleField(jsonText, "fitGenAa");
+		if (fitGenAaVal != null) {
+			inputvals.fitGenAa = fitGenAaVal;
+		}
+
+		Double fitGenaaVal = parseDoubleField(jsonText, "fitGenaa");
+		if (fitGenaaVal != null) {
+			inputvals.fitGenaa = fitGenaaVal;
+		}
+
+		Double mutAaVal = parseDoubleField(jsonText, "mutAa");
+		if (mutAaVal != null) {
+			inputvals.mutAa = mutAaVal;
+		}
+
+		Double mutaAVal = parseDoubleField(jsonText, "mutaA");
+		if (mutaAVal != null) {
+			inputvals.mutaA = mutaAVal;
+		}
+
+		Double migRateVal = parseDoubleField(jsonText, "migRate");
+		if (migRateVal != null) {
+			inputvals.migRate = migRateVal;
+		}
+
+		Double initFreqVal = parseDoubleField(jsonText, "initFreq");
+		if (initFreqVal != null) {
+			inputvals.initFreq = initFreqVal;
+		}
+
+		Integer genRunVal = parseIntegerField(jsonText, "genRun");
+		if (genRunVal != null) {
+			inputvals.genRun = genRunVal;
+		}
+
+		Integer numPopVal = parseIntegerField(jsonText, "numPop");
+		if (numPopVal != null) {
+			inputvals.numPop = numPopVal;
+		}
+
+		Boolean genSeedVal = parseBooleanField(jsonText, "genSeed");
+		if (genSeedVal != null) {
+			inputvals.genSeed = genSeedVal;
+		}
+
+		Long randSeedVal = parseLongField(jsonText, "randSeed");
+		if (randSeedVal != null) {
+			inputvals.randSeed = randSeedVal;
+		}
+	}
+
+	private Integer parseIntegerField(String jsonText, String fieldName) {
+		String rawValue = extractJsonFieldValue(jsonText, fieldName, "-?\\d+");
+		if (rawValue == null) {
+			return null;
+		}
+		return Integer.valueOf(rawValue);
+	}
+
+	private Long parseLongField(String jsonText, String fieldName) {
+		String rawValue = extractJsonFieldValue(jsonText, fieldName, "-?\\d+");
+		if (rawValue == null) {
+			return null;
+		}
+		return Long.valueOf(rawValue);
+	}
+
+	private Double parseDoubleField(String jsonText, String fieldName) {
+		String rawValue = extractJsonFieldValue(jsonText, fieldName, "-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
+		if (rawValue == null) {
+			return null;
+		}
+		return Double.valueOf(rawValue);
+	}
+
+	private Boolean parseBooleanField(String jsonText, String fieldName) {
+		String rawValue = extractJsonFieldValue(jsonText, fieldName, "true|false");
+		if (rawValue == null) {
+			return null;
+		}
+		return Boolean.valueOf(rawValue.toLowerCase());
+	}
+
+	private String extractJsonFieldValue(String jsonText, String fieldName, String valuePattern) {
+		Pattern pattern = Pattern.compile("\\\"" + Pattern.quote(fieldName) + "\\\"\\s*:\\s*(" + valuePattern + ")", Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(jsonText);
+		if (matcher.find()) {
+			return matcher.group(1);
+		}
+		return null;
+	}
 
 	public void printPopG() {
 		PrinterJob pj = PrinterJob.getPrinterJob(); 

@@ -1,0 +1,14 @@
+{
+  "popSize": 250,
+  "fitGenAA": 0.95,
+  "fitGenAa": 1.0,
+  "fitGenaa": 1.05,
+  "mutAa": 0.001,
+  "mutaA": 0.002,
+  "migRate": 0.01,
+  "initFreq": 0.4,
+  "genRun": 200,
+  "numPop": 15,
+  "genSeed": false,
+  "randSeed": 42
+}

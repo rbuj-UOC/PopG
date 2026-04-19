@@ -16,4 +16,4 @@ mkdir -p "$OUT_DIR"
 javac -d "$OUT_DIR" "$SRC_FILE"
 
 # Run the main class.
-java -cp "$OUT_DIR" popg.PopGUserInterface
+java -cp "$OUT_DIR" popg.PopGUserInterface "$@"
