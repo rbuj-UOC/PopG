@@ -41,6 +41,30 @@ You can combine it with `-n` to load defaults and immediately execute the New Ru
 
 If the file can be read, any recognized fields in the JSON will override the built-in defaults from `initInputVals()`.
 
+## Build an executable JAR
+
+From the project root:
+
+```bash
+./build.sh
+```
+
+This generates `PopG.jar` in the project root.
+
+## Run the JAR from the command line
+
+```bash
+java -jar PopG.jar
+```
+
+You can pass the same optional arguments as `run.sh`:
+
+```bash
+java -jar PopG.jar -n
+java -jar PopG.jar path/to/defaults.json
+java -jar PopG.jar path/to/defaults.json -n
+```
+
 Supported JSON keys (all optional):
 
 - `popSize`
