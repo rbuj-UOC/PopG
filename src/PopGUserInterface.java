@@ -52,12 +52,14 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	private JMenuItem mntmAbout;
 	private JMenuItem mntmQuit;
 	private JMenu mnRun;
+	private JMenu mnWindow;
 	private JMenuItem mntmContinuew;
 	private JMenuItem mntmContinue;
 	private JMenuItem mntmNewRun;
 	private JMenuItem mntmLoadRun;
 	private JMenuItem mntmRestart;
 	private JMenuItem mntmWholePlot;
+	private JMenuItem mntmTakeScreenshot;
 	public int numberOfGen;
 	public Graphics2D g2d;
 	private PopGData inputvals;
@@ -246,6 +248,16 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         
         mnRun = new JMenu("Run");
         menuFile.add(mnRun);
+
+		mnWindow = new JMenu("Window");
+		menuFile.add(mnWindow);
+		mntmTakeScreenshot = new JMenuItem("Take Screenshot");
+		mntmTakeScreenshot.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				takeWindowScreenshot();
+			}
+		});
+		mnWindow.add(mntmTakeScreenshot);
 		mntmLoadRun = new JMenuItem("Load Run");
 		mntmLoadRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1245,6 +1257,46 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		   	   // this will need to call explicit postscript writing code (probably cloned from old PopG code)
 		   }
 		   */
+		}
+	}
+
+	private void takeWindowScreenshot() {
+		JFileChooser filechooser = new JFileChooser(filedir);
+		filechooser.setSelectedFile(new File("popg-screenshot.png"));
+		filechooser.setAcceptAllFileFilterUsed(false);
+		FileNameExtensionFilter pngfilter = new FileNameExtensionFilter("PNG Image", "png");
+		filechooser.addChoosableFileFilter(pngfilter);
+		filechooser.setFileFilter(pngfilter);
+
+		int result = filechooser.showSaveDialog(this);
+		if (result != JFileChooser.APPROVE_OPTION) {
+			return;
+		}
+
+		filedir = filechooser.getCurrentDirectory().getAbsolutePath();
+		String selectedPath = filechooser.getSelectedFile().getPath();
+		if (!selectedPath.toLowerCase().endsWith(".png")) {
+			selectedPath += ".png";
+		}
+
+		File saveFile = new File(selectedPath);
+		if (saveFile.exists()) {
+			int overwrite = JOptionPane.showConfirmDialog(
+				this,
+				"File already exists. Overwrite?",
+				"Confirm overwrite",
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.WARNING_MESSAGE
+			);
+			if (overwrite != JOptionPane.YES_OPTION) {
+				return;
+			}
+		}
+
+		try {
+			savePlotImageToPath(saveFile.getAbsolutePath());
+		} catch (IOException ioe) {
+			JOptionPane.showMessageDialog(this, "Could not save screenshot: " + ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
