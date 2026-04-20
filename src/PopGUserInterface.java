@@ -18,7 +18,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
@@ -555,65 +557,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         mntmAbout = new JMenuItem("About");
         mntmAbout.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		frmAbout = new JFrame();
-        		frmAbout.setVisible(true);
-        		frmAbout.setBounds(100, 50, 630, 300);
-        		frmAbout.setTitle("About PopG");
-        		frmAbout.setLayout(null);
- 
-        		JLabel lblLine1 = new JLabel("Copyright 1993-2013. University of Washington and Joseph Felsenstein. All rights reserved.");
-        		lblLine1.setBounds(10, 10, 600, 14);
-        		frmAbout.add(lblLine1);
-        		
-        		JLabel lblLine2 = new JLabel("Permission is granted to reproduce, perform, and modify this program.");
-        		lblLine2.setBounds(10, 30, 600, 14);
-        		frmAbout.add(lblLine2);
-           		
-        		JLabel lblLine3 = new JLabel("Permission is granted to distribute or provide access to this program provided that:");
-        		lblLine3.setBounds(10, 50, 600, 14);
-        		frmAbout.add(lblLine3);
-           		
-        		JLabel lblLine4 = new JLabel("1) this copyright notice is not removed");
-        		lblLine4.setBounds(10,70, 600, 14);
-        		frmAbout.add(lblLine4);
-           		
-        		JLabel lblLine5 = new JLabel("2) this program is not integrated with or called by any product or service that generates revenue");
-        		lblLine5.setBounds(10,90, 630, 14);
-        		frmAbout.add(lblLine5);
-           		
-        		JLabel lblLine6 = new JLabel("3) your distribution of this program is free");
-        		lblLine6.setBounds(10,110, 600, 14);
-        		frmAbout.add(lblLine6);
-           		
-        		JLabel lblLine7 = new JLabel("Any modified versions of this program that are distributed or accessible shall indicate");
-        		lblLine7.setBounds(10,150, 600, 14);
-        		frmAbout.add(lblLine7);
-           		
-        		JLabel lblLine8 = new JLabel("that they are based on this program.  Educational institutions are granted permission");
-        		lblLine8.setBounds(10,170, 600, 14);
-        		frmAbout.add(lblLine8);
-          		
-        		JLabel lblLine9 = new JLabel("to distribute this program to their students and staff for a fee to recover distribution costs.");
-        		lblLine9.setBounds(10,190, 600, 14);
-        		frmAbout.add(lblLine9);
-          		
-        		JLabel lblLine10 = new JLabel("Permission requests for any other distribution of this program should be directed to:");
-        		lblLine10.setBounds(10,210, 600, 14);
-        		frmAbout.add(lblLine10);
-          		
-        		JLabel lblLine11 = new JLabel("license (at) u.washington.edu.");
-        		lblLine11.setBounds(10,230, 600, 14);
-        		frmAbout.add(lblLine11);
-      		
-        		btnOK = new JButton("OK");
-        		btnOK.setBounds(500, 250, 84, 25);
-        		btnOK.addActionListener(new ActionListener() {
-        			public void actionPerformed(ActionEvent e) {
-        				frmAbout.dispose();
-    					frmPopG.repaint();        					
-       			}
-        		});
-        		frmAbout.add(btnOK);
+				showAboutWindow();
         	}
           });
         mnFile.add(mntmAbout);
@@ -1373,6 +1317,70 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 				radioItem.setSelected(selectedClassName.equals(radioItem.getActionCommand()));
 			}
 		}
+	}
+
+	private void showAboutWindow() {
+		if (frmAbout != null && frmAbout.isDisplayable()) {
+			frmAbout.toFront();
+			frmAbout.requestFocus();
+			return;
+		}
+
+		frmAbout = new JFrame("About PopG");
+		frmAbout.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frmAbout.setSize(700, 360);
+		frmAbout.setResizable(false);
+		frmAbout.setLocationRelativeTo(frmPopG);
+
+		JPanel root = new JPanel(new BorderLayout(0, 12));
+		root.setBorder(new EmptyBorder(18, 22, 18, 22));
+		frmAbout.setContentPane(root);
+
+		JLabel titleLabel = new JLabel("PopG");
+		titleLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
+		JLabel subtitleLabel = new JLabel("Population Genetics Simulation");
+		subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+		JPanel headerPanel = new JPanel(new BorderLayout(0, 4));
+		headerPanel.add(titleLabel, BorderLayout.NORTH);
+		headerPanel.add(subtitleLabel, BorderLayout.SOUTH);
+		root.add(headerPanel, BorderLayout.NORTH);
+
+		String aboutText = "Copyright 1993-2013. University of Washington and Joseph Felsenstein. All rights reserved.\n\n"
+			+ "Permission is granted to reproduce, perform, and modify this program.\n\n"
+			+ "Permission is granted to distribute or provide access to this program provided that:\n"
+			+ "1) this copyright notice is not removed\n"
+			+ "2) this program is not integrated with or called by any product or service that generates revenue\n"
+			+ "3) your distribution of this program is free\n\n"
+			+ "Any modified versions of this program that are distributed or accessible shall indicate that they are based on this program. "
+			+ "Educational institutions are granted permission to distribute this program to their students and staff for a fee to recover distribution costs.\n\n"
+			+ "Permission requests for any other distribution of this program should be directed to: license (at) u.washington.edu.";
+
+		JTextArea aboutTextArea = new JTextArea(aboutText);
+		aboutTextArea.setEditable(false);
+		aboutTextArea.setLineWrap(true);
+		aboutTextArea.setWrapStyleWord(true);
+		aboutTextArea.setOpaque(false);
+		aboutTextArea.setFont(new Font("SansSerif", Font.PLAIN, 13));
+		aboutTextArea.setBorder(new EmptyBorder(2, 0, 2, 0));
+
+		JScrollPane aboutScrollPane = new JScrollPane(aboutTextArea);
+		aboutScrollPane.setBorder(null);
+		aboutScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		root.add(aboutScrollPane, BorderLayout.CENTER);
+
+		JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		JButton closeButton = new JButton("Close");
+		closeButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frmAbout.dispose();
+				frmPopG.repaint();
+			}
+		});
+		footerPanel.add(closeButton);
+		root.add(footerPanel, BorderLayout.SOUTH);
+
+		frmAbout.setVisible(true);
 	}
 
 	private void takeWindowScreenshot() {
