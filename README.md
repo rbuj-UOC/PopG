@@ -1,6 +1,7 @@
 # PopG
 
-This project includes a helper script to compile and run the Java application from the command line.
+This project includes a helper script to compile and run the Java application
+from the command line.
 
 ## Requirements
 
@@ -14,7 +15,8 @@ From the project root:
 ./run.sh
 ```
 
-To start a new run immediately at startup (without opening the New Run settings form), use:
+To start a new run immediately at startup (without opening the New Run settings
+form), use:
 
 ```bash
 ./run.sh -n
@@ -39,7 +41,8 @@ You can pass a JSON file path to preload default input values.
 ./run.sh path/to/defaults.json
 ```
 
-You can combine it with `-n` to load defaults and immediately execute the New Run flow:
+You can combine it with `-n` to load defaults and immediately execute the New
+Run flow:
 
 ```bash
 ./run.sh path/to/defaults.json -n
@@ -51,7 +54,8 @@ You can also combine defaults, auto-run, and screenshot capture:
 ./run.sh path/to/defaults.json -n -p=out/plot.png
 ```
 
-If the file can be read, any recognized fields in the JSON will override the built-in defaults from `initInputVals()`.
+If the file can be read, any recognized fields in the JSON will override the
+built-in defaults from `initInputVals()`.
 
 ## Build an executable JAR
 
@@ -81,7 +85,8 @@ java -jar PopG.jar path/to/defaults.json -n -p=out/plot.png
 CLI options:
 
 - `-n`: start a New Run immediately at startup.
-- `-p=path/to/file.png`: after a run finishes, save a plot screenshot to the given path and close the application. Requires `-n`.
+- `-p=path/to/file.png`: after a run finishes, save a plot screenshot to the
+given path and close the application. Requires `-n`.
 
 Supported JSON keys (all optional):
 

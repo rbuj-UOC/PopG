@@ -3,6 +3,8 @@ package popg;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -17,6 +19,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -262,6 +265,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		mnWindow.add(mnLookAndFeel);
 		populateLookAndFeelMenu();
 		mntmTakeScreenshot = new JMenuItem("Take Screenshot");
+		mntmTakeScreenshot.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, getMenuShortcutMask() | InputEvent.SHIFT_DOWN_MASK));
 		mntmTakeScreenshot.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				takeWindowScreenshot();
@@ -269,6 +273,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		});
 		mnWindow.add(mntmTakeScreenshot);
 		mntmLoadRun = new JMenuItem("Load Run");
+		mntmLoadRun.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, getMenuShortcutMask()));
 		mntmLoadRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				loadRunFromJsonChooser();
@@ -277,6 +282,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		mnRun.add(mntmLoadRun);
 
         mntmContinuew = new JMenuItem("Continue w/ 100");
+		mntmContinuew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, getMenuShortcutMask()));
         mntmContinuew.setEnabled(false);
         mntmContinuew.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
@@ -286,6 +292,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         mnRun.add(mntmContinuew);
                         
         mntmContinue = new JMenuItem("Continue");
+		mntmContinue.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, getMenuShortcutMask() | InputEvent.SHIFT_DOWN_MASK));
         mntmContinue.setEnabled(false);
         mntmContinue.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
@@ -334,6 +341,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         mnRun.add(mntmContinue);
     	
         mntmNewRun = new JMenuItem("New Run");
+		mntmNewRun.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, getMenuShortcutMask()));
         mntmNewRun.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {     		
         		frmPopGSettingsMenu = new JFrame();
@@ -509,6 +517,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         mnRun.add(mntmNewRun);
                                         
         mntmRestart = new JMenuItem("Restart");
+		mntmRestart.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, getMenuShortcutMask() | InputEvent.SHIFT_DOWN_MASK));
         mntmRestart.setEnabled(false);
         mntmRestart.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -520,6 +529,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         mnRun.add(mntmRestart);
         
         mntmWholePlot = new JMenuItem("Display whole plot");
+		mntmWholePlot.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, getMenuShortcutMask()));
         mntmWholePlot.setEnabled(false);
         mntmWholePlot.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
@@ -532,6 +542,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         frmPopG.setVisible(true);
 
         mntmPrint = new JMenuItem("Print");
+		mntmPrint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, getMenuShortcutMask()));
         mntmPrint.setEnabled(false);
         mntmPrint.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -543,6 +554,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         frmPopG.setVisible(true);
 
         mntmAbout = new JMenuItem("About");
+		mntmAbout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, getMenuShortcutMask()));
         mntmAbout.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
 				showAboutWindow();
@@ -554,6 +566,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         frmPopG.setVisible(true);
 
         mntmQuit = new JMenuItem("Quit");
+		mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, getMenuShortcutMask()));
         mntmQuit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
@@ -570,6 +583,10 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		if (options != null && options.autoStartNewRun) {
 			runNewRunDirectly();
 		}
+	}
+
+	private int getMenuShortcutMask() {
+		return Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 	}
 	
 	public boolean checkInputVals() {
