@@ -8,6 +8,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -16,9 +17,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingUtilities;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -53,6 +56,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	private JMenuItem mntmQuit;
 	private JMenu mnRun;
 	private JMenu mnWindow;
+	private JMenu mnLookAndFeel;
 	private JMenuItem mntmContinuew;
 	private JMenuItem mntmContinue;
 	private JMenuItem mntmNewRun;
@@ -127,6 +131,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	private String filedir;
 	private String pendingScreenshotPath;
 	private boolean screenshotCaptured;
+	private String currentLookAndFeelClassName;
 	
 	public class PopGData {
 		Integer popSize;
@@ -207,6 +212,7 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		// initialize data
 		inputvals = new PopGData();
 		initInputVals();
+		initializeLookAndFeelFromPlatform();
 		if (options != null && options.defaultsJsonPath != null) {
 			try {
 				loadInputValsFromJson(options.defaultsJsonPath);
@@ -251,6 +257,9 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 
 		mnWindow = new JMenu("Window");
 		menuFile.add(mnWindow);
+		mnLookAndFeel = new JMenu("Look and Feel");
+		mnWindow.add(mnLookAndFeel);
+		populateLookAndFeelMenu();
 		mntmTakeScreenshot = new JMenuItem("Take Screenshot");
 		mntmTakeScreenshot.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1257,6 +1266,112 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		   	   // this will need to call explicit postscript writing code (probably cloned from old PopG code)
 		   }
 		   */
+		}
+	}
+
+	private void initializeLookAndFeelFromPlatform() {
+		String lafClassName = UIManager.getSystemLookAndFeelClassName();
+		if (lafClassName == null || lafClassName.isEmpty()) {
+			lafClassName = UIManager.getCrossPlatformLookAndFeelClassName();
+		}
+
+		try {
+			UIManager.setLookAndFeel(lafClassName);
+			currentLookAndFeelClassName = lafClassName;
+		} catch (Exception e) {
+			try {
+				String fallbackLaf = UIManager.getCrossPlatformLookAndFeelClassName();
+				UIManager.setLookAndFeel(fallbackLaf);
+				currentLookAndFeelClassName = fallbackLaf;
+			} catch (Exception ignored) {
+				if (UIManager.getLookAndFeel() != null) {
+					currentLookAndFeelClassName = UIManager.getLookAndFeel().getClass().getName();
+				}
+			}
+		}
+	}
+
+	private void populateLookAndFeelMenu() {
+		mnLookAndFeel.removeAll();
+		ButtonGroup group = new ButtonGroup();
+		UIManager.LookAndFeelInfo[] lookAndFeelInfos = UIManager.getInstalledLookAndFeels();
+
+		if (lookAndFeelInfos == null || lookAndFeelInfos.length == 0) {
+			JMenuItem noThemesItem = new JMenuItem("No themes available");
+			noThemesItem.setEnabled(false);
+			mnLookAndFeel.add(noThemesItem);
+			return;
+		}
+
+		String selectedLookAndFeel = currentLookAndFeelClassName;
+		if (selectedLookAndFeel == null && UIManager.getLookAndFeel() != null) {
+			selectedLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
+		}
+
+		for (int i = 0; i < lookAndFeelInfos.length; i++) {
+			final String lafName = lookAndFeelInfos[i].getName();
+			final String lafClassName = lookAndFeelInfos[i].getClassName();
+			JRadioButtonMenuItem lafItem = new JRadioButtonMenuItem(lafName);
+			lafItem.setActionCommand(lafClassName);
+			lafItem.setSelected(lafClassName.equals(selectedLookAndFeel));
+			lafItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					applyLookAndFeelFromMenu(lafClassName);
+				}
+			});
+			group.add(lafItem);
+			mnLookAndFeel.add(lafItem);
+		}
+	}
+
+	private void applyLookAndFeelFromMenu(String lafClassName) {
+		String previousLookAndFeel = currentLookAndFeelClassName;
+		if (lafClassName.equals(previousLookAndFeel)) {
+			return;
+		}
+
+		try {
+			UIManager.setLookAndFeel(lafClassName);
+			currentLookAndFeelClassName = lafClassName;
+			refreshLookAndFeelForOpenWindows();
+			syncLookAndFeelMenuSelection(lafClassName);
+		} catch (Exception e) {
+			syncLookAndFeelMenuSelection(previousLookAndFeel);
+			JOptionPane.showMessageDialog(this, "Could not apply look and feel: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private void refreshLookAndFeelForOpenWindows() {
+		refreshLookAndFeelForFrame(frmPopG);
+		refreshLookAndFeelForFrame(frmPopGSettingsMenu);
+		refreshLookAndFeelForFrame(frmContinue);
+		refreshLookAndFeelForFrame(frmAbout);
+		SwingUtilities.updateComponentTreeUI(this);
+		revalidate();
+		repaint();
+	}
+
+	private void refreshLookAndFeelForFrame(JFrame frame) {
+		if (frame == null) {
+			return;
+		}
+		SwingUtilities.updateComponentTreeUI(frame);
+		frame.invalidate();
+		frame.validate();
+		frame.repaint();
+	}
+
+	private void syncLookAndFeelMenuSelection(String selectedClassName) {
+		if (mnLookAndFeel == null || selectedClassName == null) {
+			return;
+		}
+
+		for (int i = 0; i < mnLookAndFeel.getItemCount(); i++) {
+			JMenuItem item = mnLookAndFeel.getItem(i);
+			if (item instanceof JRadioButtonMenuItem) {
+				JRadioButtonMenuItem radioItem = (JRadioButtonMenuItem) item;
+				radioItem.setSelected(selectedClassName.equals(radioItem.getActionCommand()));
+			}
 		}
 	}
 
