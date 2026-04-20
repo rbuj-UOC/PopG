@@ -1150,7 +1150,7 @@ public class PopGUserInterface extends JPanel implements ActionListener {
 
   private String extractJsonFieldValue(String jsonText, String fieldName, String valuePattern) {
     Pattern pattern = Pattern.compile("\\\"" + Pattern.quote(fieldName) + "\\\"\\s*:\\s*(" + valuePattern + ")",
-        Pattern.CASE_INSENSITIVE);
+        0);
     Matcher matcher = pattern.matcher(jsonText);
     if (matcher.find()) {
       return matcher.group(1);
