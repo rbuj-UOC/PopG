@@ -54,6 +54,7 @@ public class PopGUserInterface extends JPanel implements ActionListener {
   private JFrame frmPopG;
   private JMenuBar menuFile;
   private JMenu mnFile;
+  private JMenuItem mntmSaveParams;
   private JMenuItem mntmPrint;
   private JMenuItem mntmAbout;
   private JMenuItem mntmQuit;
@@ -135,6 +136,7 @@ public class PopGUserInterface extends JPanel implements ActionListener {
   private String pendingScreenshotPath;
   private boolean screenshotCaptured;
   private String currentLookAndFeelClassName;
+  private boolean canSaveParameters;
 
   public class PopGData {
     Integer popSize;
@@ -279,6 +281,16 @@ public class PopGUserInterface extends JPanel implements ActionListener {
       }
     });
     mnFile.add(mntmLoadRun);
+
+    mntmSaveParams = new JMenuItem("Save...");
+    mntmSaveParams.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, getMenuShortcutMask()));
+    mntmSaveParams.setEnabled(false);
+    mntmSaveParams.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        saveInputValsToJsonChooser();
+      }
+    });
+    mnFile.add(mntmSaveParams);
 
     mntmContinuew = new JMenuItem("Continue w/ 100");
     mntmContinuew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, getMenuShortcutMask()));
@@ -581,6 +593,8 @@ public class PopGUserInterface extends JPanel implements ActionListener {
     if (options != null && options.autoStartNewRun) {
       runNewRunDirectly();
     }
+
+    updateSaveMenuItemState();
   }
 
   private int getMenuShortcutMask() {
@@ -702,6 +716,8 @@ public class PopGUserInterface extends JPanel implements ActionListener {
   private void startNewRunFromCurrentInputVals(boolean closeSettingsWindow) {
     enableRunMenuItems();
     if (checkInputVals()) {
+      canSaveParameters = true;
+      updateSaveMenuItemState();
       if (closeSettingsWindow && frmPopGSettingsMenu != null) {
         frmPopGSettingsMenu.dispose();
       }
@@ -1034,6 +1050,71 @@ public class PopGUserInterface extends JPanel implements ActionListener {
   private void loadInputValsFromJson(String jsonFilePath) throws IOException {
     String jsonText = Files.readString(Path.of(jsonFilePath), StandardCharsets.UTF_8);
     applyInputValsFromJsonText(jsonText);
+    canSaveParameters = true;
+    updateSaveMenuItemState();
+  }
+
+  private void updateSaveMenuItemState() {
+    if (mntmSaveParams != null) {
+      mntmSaveParams.setEnabled(canSaveParameters);
+    }
+  }
+
+  private void saveInputValsToJsonChooser() {
+    JFileChooser filechooser = new JFileChooser(filedir);
+    filechooser.setSelectedFile(new File("popg-params.json"));
+    filechooser.setAcceptAllFileFilterUsed(false);
+    FileNameExtensionFilter jsonFilter = new FileNameExtensionFilter("JSON File", "json");
+    filechooser.addChoosableFileFilter(jsonFilter);
+    filechooser.setFileFilter(jsonFilter);
+
+    int result = filechooser.showSaveDialog(this);
+    if (result != JFileChooser.APPROVE_OPTION) {
+      return;
+    }
+
+    filedir = filechooser.getCurrentDirectory().getAbsolutePath();
+    String selectedPath = filechooser.getSelectedFile().getPath();
+    if (!selectedPath.toLowerCase().endsWith(".json")) {
+      selectedPath += ".json";
+    }
+
+    File saveFile = new File(selectedPath);
+    if (saveFile.exists()) {
+      int overwrite = JOptionPane.showConfirmDialog(
+          this,
+          "File already exists. Overwrite?",
+          "Confirm overwrite",
+          JOptionPane.YES_NO_OPTION,
+          JOptionPane.WARNING_MESSAGE);
+      if (overwrite != JOptionPane.YES_OPTION) {
+        return;
+      }
+    }
+
+    try {
+      Files.writeString(saveFile.toPath(), buildInputValsJsonText(), StandardCharsets.UTF_8);
+    } catch (IOException ioe) {
+      JOptionPane.showMessageDialog(this, "Could not save JSON file: " + ioe.getMessage(), "Error",
+          JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
+  private String buildInputValsJsonText() {
+    return "{\n"
+        + "  \"popSize\": " + inputvals.popSize + ",\n"
+        + "  \"fitGenAA\": " + inputvals.fitGenAA + ",\n"
+        + "  \"fitGenAa\": " + inputvals.fitGenAa + ",\n"
+        + "  \"fitGenaa\": " + inputvals.fitGenaa + ",\n"
+        + "  \"mutAa\": " + inputvals.mutAa + ",\n"
+        + "  \"mutaA\": " + inputvals.mutaA + ",\n"
+        + "  \"migRate\": " + inputvals.migRate + ",\n"
+        + "  \"initFreq\": " + inputvals.initFreq + ",\n"
+        + "  \"genRun\": " + inputvals.genRun + ",\n"
+        + "  \"numPop\": " + inputvals.numPop + ",\n"
+        + "  \"genSeed\": " + inputvals.genSeed + ",\n"
+        + "  \"randSeed\": " + inputvals.randSeed + "\n"
+        + "}\n";
   }
 
   private void applyInputValsFromJsonText(String jsonText) {
