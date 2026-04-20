@@ -1,5 +1,5 @@
 {
-  "popSize": 1000,
+  "popSize": 100,
   "fitGenAA": 1.0,
   "fitGenAa": 1.0,
   "fitGenaa": 1.0,
@@ -7,8 +7,8 @@
   "mutaA": 0.0,
   "migRate": 0.0,
   "initFreq": 0.5,
-  "genRun": 500,
-  "numPop": 1,
+  "genRun": 2000,
+  "numPop": 10,
   "genSeed": false,
   "randSeed": 1809
 }
