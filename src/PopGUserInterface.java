@@ -52,7 +52,6 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 	private JFrame frmPopG;
 	private JMenuBar menuFile;
 	private JMenu mnFile;
-	private JMenuItem mntmSave;
 	private JMenuItem mntmPrint;
 	private JMenuItem mntmAbout;
 	private JMenuItem mntmQuit;
@@ -531,17 +530,6 @@ public class PopGUserInterface extends JPanel implements ActionListener{
         mnRun.add(mntmWholePlot);
         
         frmPopG.setVisible(true);
-       
-        mntmSave = new JMenuItem("Save");
-        mntmSave.setEnabled(false);
-        mntmSave.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		savePopG();
-        	}
-       });
-        
-        mnFile.add(mntmSave);
-        frmPopG.setVisible(true);
 
         mntmPrint = new JMenuItem("Print");
         mntmPrint.setEnabled(false);
@@ -694,7 +682,6 @@ public class PopGUserInterface extends JPanel implements ActionListener{
 		mntmRestart.setEnabled(true);
 		mntmContinuew.setText("Continue w/ " + inputvals.genRun);
 		mntmWholePlot.setEnabled(true);
-		mntmSave.setEnabled(true);
 		mntmPrint.setEnabled(true);
 	}
 
