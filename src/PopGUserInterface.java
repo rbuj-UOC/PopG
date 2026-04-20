@@ -32,7 +32,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.Timer;
 
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.print.Book;
 import java.awt.print.PageFormat;
@@ -272,14 +271,14 @@ public class PopGUserInterface extends JPanel implements ActionListener {
       }
     });
     mnWindow.add(mntmTakeScreenshot);
-    mntmLoadRun = new JMenuItem("Load Run");
+    mntmLoadRun = new JMenuItem("Open...");
     mntmLoadRun.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, getMenuShortcutMask()));
     mntmLoadRun.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         loadRunFromJsonChooser();
       }
     });
-    mnRun.add(mntmLoadRun);
+    mnFile.add(mntmLoadRun);
 
     mntmContinuew = new JMenuItem("Continue w/ 100");
     mntmContinuew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, getMenuShortcutMask()));
