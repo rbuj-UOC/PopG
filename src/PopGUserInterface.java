@@ -232,6 +232,7 @@ public class PopGUserInterface extends JPanel implements ActionListener {
     frmPopG.setSize(650, 430);
     frmPopG.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frmPopG.getContentPane().setLayout(null);
+    frmPopG.setLocationRelativeTo(null);
     frmPopG.setVisible(true);
     setBounds(100, 100, 485, 382);
     contentPane = new JPanel();
@@ -297,9 +298,10 @@ public class PopGUserInterface extends JPanel implements ActionListener {
     mntmContinue.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         frmContinue = new JFrame();
-        frmContinue.setVisible(true);
-        frmContinue.setBounds(20, 50, 300, 130);
+        frmContinue.setSize(300, 130);
+        frmContinue.setLocationRelativeTo(frmPopG);
         frmContinue.setTitle("enter a number");
+        frmContinue.setVisible(true);
         frmContinue.setLayout(null);
         frmContinue.setResizable(false);
 
@@ -345,9 +347,10 @@ public class PopGUserInterface extends JPanel implements ActionListener {
     mntmNewRun.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         frmPopGSettingsMenu = new JFrame();
-        frmPopGSettingsMenu.setVisible(true);
-        frmPopGSettingsMenu.setBounds(100, 50, 480, 350);
+        frmPopGSettingsMenu.setSize(480, 350);
         frmPopGSettingsMenu.setTitle("PopG Settings");
+        frmPopGSettingsMenu.setLocationRelativeTo(frmPopG);
+        frmPopGSettingsMenu.setVisible(true);
         frmPopGSettingsMenu.setLayout(null);
 
         lblPopSize = new JLabel("Population size:");
